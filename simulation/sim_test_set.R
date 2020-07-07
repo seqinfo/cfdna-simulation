@@ -2,7 +2,7 @@ source("sim.R")
 
 
 library(dplyr)
-library(feather)
+library(arrow)
 
 
 samples <- 10000
