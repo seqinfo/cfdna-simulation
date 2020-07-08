@@ -1,8 +1,8 @@
 source("sim.R")
 
 
-library(dplyr)
 library(arrow)
+library(glue)
 
 
 samples <- 100
@@ -15,9 +15,9 @@ set.seed(42)
 
 gens <- gen_genotypes(samples, snps)
 
-path <- "params_data"
-dir.create(path)
-write_feather(gens, sprintf("%s/gens.feather", path))
+set_path <- "train_data"
+dir.create(set_path)
+write_feather(gens, glue("{set_path}/gens.feather"))
 
 for (cov in covs) {
   cat("coverage:", cov, "\n")
@@ -25,12 +25,15 @@ for (cov in covs) {
     cat("fetal fraction:", ff, "\n")
     counts <- gen_counts(gens, cov, ff, vmr)
 
-    # write data
-    out_path <- sprintf("%s/coverage/%s/fetal_fraction/%s", path, cov, ff)
-	dir.create(out_path, recursive = T)
-    write_feather(counts, sprintf("%s/counts.feather", out_path))
-    write_feather(sim_euploidy(gens, counts), sprintf("%s/euploidy.feather", out_path))
-    write_feather(sim_maternal_trisomy(gens, counts), sprintf("%s/maternal_trisomy.feather", out_path))
-    write_feather(sim_paternal_trisomy(gens, counts), sprintf("%s/paternal_trisomy.feather", out_path))
+    # write to file
+    file_path <- glue("{set_path}/coverage/{cov}/fetal_fraction/{ff}")
+    dir.create(file_path, recursive = T)
+    write_feather(counts, glue("{file_path}/counts.feather"))
+    write_feather(sim_euploidy(gens, counts),
+                  glue("{file_path}/euploidy.feather"))
+    write_feather(sim_maternal_trisomy(gens, counts),
+                  glue("{file_path}/maternal_trisomy.feather"))
+    write_feather(sim_paternal_trisomy(gens, counts),
+                  glue("{file_path}/paternal_trisomy.feather"))
   }
 }
